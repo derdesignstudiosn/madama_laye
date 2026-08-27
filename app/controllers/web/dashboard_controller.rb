@@ -9,11 +9,11 @@ class Web::DashboardController < WebController
       @pending_orders = @user.orders_as_cook.pending_orders.count
       @in_progress_orders = @user.orders_as_cook.where(status: [:accepted, :in_progress, :driver_assigned, :in_delivery]).count
       @today_meals = @user.meals.available.count
-      @today_orders = @user.orders_as_cook.today_orders
+      @today_orders = @user.orders_as_cook.today_orders.includes(:customer)
       render :cook_dashboard
     when "client"
-      @active_orders = @user.orders_as_customer.where.not(status: [:delivered, :completed, :cancelled])
-      @order_history = @user.orders_as_customer.where(status: [:delivered, :completed]).limit(5)
+      @active_orders = @user.orders_as_customer.includes(:cook).where.not(status: [:delivered, :completed, :cancelled])
+      @order_history = @user.orders_as_customer.includes(:cook).where(status: [:delivered, :completed]).limit(5)
       render :client_dashboard
     when "delivery_driver"
       @available_orders = Order.where(status: :accepted).count

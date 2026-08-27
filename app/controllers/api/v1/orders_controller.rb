@@ -14,6 +14,7 @@ module Api
                  end
 
         orders = orders.where(status: params[:status]) if params[:status].present?
+        orders = orders.includes(:cook, :customer, :delivery_driver, :order_items)
         result = paginate(orders.order(created_at: :desc))
         render_success({ orders: result[:data].map { |o| order_response(o) }, meta: result[:meta] })
       end
@@ -139,7 +140,7 @@ module Api
 
       def my_deliveries
         require_role(:delivery_driver)
-        orders = current_user.orders_as_delivery_driver
+        orders = current_user.orders_as_delivery_driver.includes(:cook, :customer, :order_items)
         result = paginate(orders.order(created_at: :desc))
         render_success({ orders: result[:data].map { |o| order_response(o) }, meta: result[:meta] })
       end
@@ -165,6 +166,7 @@ module Api
         end
 
         orders = Order.where(status: :accepted)
+                      .includes(:cook, :customer, :order_items)
                       .where(
                         "earth_distance(ll_to_earth(?, ?), ll_to_earth(delivery_latitude, delivery_longitude)) <= ?",
                         current_user.latitude, current_user.longitude, 1000
@@ -183,13 +185,23 @@ module Api
       end
 
       def order_response(order)
+        item_ids_by_type = {}
+        order.order_items.each do |oi|
+          item_ids_by_type[oi.item_type] ||= []
+          item_ids_by_type[oi.item_type] << oi.item_id
+        end
+        items_map = {}
+        item_ids_by_type.each do |type, ids|
+          items_map.merge!(type.constantize.where(id: ids).pluck(:id, :name).to_h { |id, name| [id, name] })
+        end
+
         {
           id: order.id,
           customer: { id: order.customer.id, first_name: order.customer.first_name, last_name: order.customer.last_name, phone_number: order.customer.phone_number },
           cook: { id: order.cook.id, first_name: order.cook.first_name, last_name: order.cook.last_name },
           delivery_driver: order.delivery_driver ? { id: order.delivery_driver.id, first_name: order.delivery_driver.first_name, last_name: order.delivery_driver.last_name } : nil,
           status: order.status,
-          items: order.order_items.map { |oi| { id: oi.id, item_type: oi.item_type, item_id: oi.item_id, quantity: oi.quantity, unit_price: oi.unit_price.to_f, name: oi.item.try(:name) } },
+          items: order.order_items.map { |oi| { id: oi.id, item_type: oi.item_type, item_id: oi.item_id, quantity: oi.quantity, unit_price: oi.unit_price.to_f, name: items_map[oi.item_id] } },
           total_amount: order.total_amount.to_f,
           delivery_address: order.delivery_address,
           delivery_latitude: order.delivery_latitude,

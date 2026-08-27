@@ -3,9 +3,9 @@ class Web::OrdersController < WebController
 
   def index
     @orders = case current_user.role
-              when "cook" then current_user.orders_as_cook
-              when "delivery_driver" then current_user.orders_as_delivery_driver
-              else current_user.orders_as_customer
+              when "cook" then current_user.orders_as_cook.includes(:customer, :order_items)
+              when "delivery_driver" then current_user.orders_as_delivery_driver.includes(:customer, :cook, :order_items)
+              else current_user.orders_as_customer.includes(:cook, :order_items)
               end
     @orders = @orders.order(created_at: :desc)
   end
@@ -31,7 +31,8 @@ class Web::OrdersController < WebController
 
   def assign
     @order = current_user.orders_as_cook.find(params[:id])
-    @drivers = User.delivery_driver.active
+    @my_drivers = current_user.my_drivers.active
+    @all_drivers = User.delivery_driver.active
   rescue ActiveRecord::RecordNotFound
     redirect_to "/orders", alert: "Commande non trouvée"
   end

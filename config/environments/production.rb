@@ -61,10 +61,10 @@ Rails.application.configure do
   #
   config.host_authorization = { exclude: ->(request) { request.path == "/up" || request.path == "/" } }
 
-  config.secret_key_base = ENV['SECRET_KEY_BASE']
+  config.secret_key_base = ENV['SECRET_KEY_BASE'] || ENV['RAILS_MASTER_KEY'] || 'dummy_key_for_assets_precompile'
 
-  config.hosts << 'athletic-perfection-production-1e59.up.railway.app'
+  config.hosts << 'madamelaye-production.up.railway.app'
+  config.hosts << /.*\.railway\.app/
   config.hosts << /.*\.railway\.internal/
-  config.hosts << /.*\.rlwy\.net/
 
 end

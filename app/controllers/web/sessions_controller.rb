@@ -6,7 +6,8 @@ class Web::SessionsController < WebController
   end
 
   def create
-    user = User.find_by(phone_number: params[:phone_number])
+    phone = normalize_phone(params[:phone_number])
+    user = User.find_by(phone_number: phone)
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
       redirect_to "/dashboard", notice: "Bonjour #{user.first_name} !"

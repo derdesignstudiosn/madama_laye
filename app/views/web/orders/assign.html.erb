@@ -9,19 +9,36 @@
       <p class="text-sm"><%= @order.delivery_address %></p>
     </div>
 
-    <form action="/orders/<%= @order.id %>/assign_driver" method="post" class="space-y-4">
-      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-      <div>
-        <label class="label">Choisir un livreur</label>
+    <% if @my_drivers.any? %>
+      <div class="mb-4">
+        <p class="text-sm font-medium text-gray-500 mb-2">Mes livreurs</p>
+        <form action="/orders/<%= @order.id %>/assign_driver" method="post" class="space-y-2">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          <select name="driver_id" required class="select">
+            <% @my_drivers.each do |d| %>
+              <option value="<%= d.id %>"><%= d.full_name %> — <%= d.phone_number %></option>
+            <% end %>
+          </select>
+          <button type="submit" class="btn w-full" style="background-color:#9333ea;color:white;border:none">
+            <i class="fas fa-check"></i> Assigner
+          </button>
+        </form>
+      </div>
+    <% end %>
+
+    <details class="text-sm">
+      <summary class="cursor-pointer text-primary font-medium">Tous les livreurs disponibles</summary>
+      <form action="/orders/<%= @order.id %>/assign_driver" method="post" class="space-y-2 mt-2">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
         <select name="driver_id" required class="select">
-          <% @drivers.each do |d| %>
+          <% @all_drivers.each do |d| %>
             <option value="<%= d.id %>"><%= d.full_name %> — <%= d.phone_number %></option>
           <% end %>
         </select>
-      </div>
-      <button type="submit" class="btn w-full" style="background-color:#9333ea;color:white;border:none">
-        <i class="fas fa-check"></i> Assigner
-      </button>
-    </form>
+        <button type="submit" class="btn w-full" style="background-color:#9333ea;color:white;border:none">
+          <i class="fas fa-check"></i> Assigner
+        </button>
+      </form>
+    </details>
   </div>
 </div>

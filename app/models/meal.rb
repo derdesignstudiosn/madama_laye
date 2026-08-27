@@ -22,7 +22,8 @@ class Meal < ApplicationRecord
   scope :for_day, ->(day) { where(day_of_week: day) }
   scope :for_meal_type, ->(type) { where(meal_type: type) }
 
-  def average_rating
-    reviews.average(:rating)&.round(1) || 0
+  def update_rating_cache!
+    avg = reviews.average(:rating)&.round(1) || 0
+    update_columns(average_rating: avg, reviews_count: reviews.count)
   end
 end

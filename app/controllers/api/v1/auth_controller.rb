@@ -5,6 +5,7 @@ module Api
 
       def signup
         user = User.new(signup_params)
+        user.phone_number = normalize_phone(user.phone_number)
         user.role = params[:role] || :client
 
         if user.save
@@ -23,7 +24,8 @@ module Api
       end
 
       def login
-        user = User.find_by(phone_number: params[:phone_number])
+        phone = normalize_phone(params[:phone_number])
+        user = User.find_by(phone_number: phone)
 
         if user&.authenticate(params[:password])
           token = JwtService.encode(user_id: user.id, role: user.role)
@@ -60,6 +62,12 @@ module Api
           status: user.status,
           balance: user.balance
         }
+      end
+
+      def normalize_phone(raw)
+        return raw if raw.blank?
+        cleaned = raw.strip.gsub(/[\s\-\+]/, '')
+        cleaned.start_with?('221') ? cleaned : "221#{cleaned}"
       end
     end
   end

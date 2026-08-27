@@ -25,4 +25,10 @@ class WebController < ActionController::Base
       redirect_to "/", alert: "Accès non autorisé"
     end
   end
+
+  def normalize_phone(raw)
+    return raw if raw.blank?
+    cleaned = raw.strip.gsub(/[\s\-\+]/, '')
+    cleaned.start_with?('221') ? cleaned : "221#{cleaned}"
+  end
 end

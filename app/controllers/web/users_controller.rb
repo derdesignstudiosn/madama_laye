@@ -8,6 +8,7 @@ class Web::UsersController < WebController
 
   def create
     @user = User.new(user_params)
+    @user.phone_number = normalize_phone(@user.phone_number)
     @user.status = :active
 
     if @user.save

@@ -7,7 +7,7 @@ module Api
         keyword = params[:keyword]&.strip&.downcase
         meal_type_filter = params[:meal_type].presence
         today = Date.current.strftime("%A").downcase
-        base_meals = Meal.available.where(day_of_week: Meal.day_of_weeks[today])
+        base_meals = Meal.available.includes(:user).where(day_of_week: Meal.day_of_weeks[today])
         base_meals = base_meals.where(meal_type: meal_type_filter) if meal_type_filter.present?
 
         if keyword.present?
@@ -22,6 +22,9 @@ module Api
           meals = base_meals.limit(10)
         end
 
+        meal_ids = meals.map(&:id)
+        ratings = Review.where(meal_id: meal_ids).group(:meal_id).select(:meal_id, 'AVG(rating) AS avg_rating', 'COUNT(*) AS count').index_by(&:meal_id)
+
         results_map = {}
         meals.group_by(&:user).each do |cook, cook_meals|
           results_map[cook.id] = {
@@ -30,9 +33,10 @@ module Api
               address: cook.address, latitude: cook.latitude, longitude: cook.longitude, avatar: cook.avatar
             },
             menus: cook_meals.map { |m|
+              r = ratings[m.id]
               {
                 id: m.id, name: m.name, description: m.description, price: m.price.to_f,
-                meal_type: m.meal_type, average_rating: m.average_rating, reviews_count: m.reviews.count
+                meal_type: m.meal_type, average_rating: r ? r.avg_rating.to_f.round(1) : 0, reviews_count: r ? r.count : 0
               }
             },
             products: []

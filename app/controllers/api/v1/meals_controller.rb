@@ -71,7 +71,8 @@ module Api
           meal_type: meal.meal_type,
           available: meal.available,
           portion_count: meal.portion_count,
-          average_rating: meal.average_rating,
+          average_rating: meal.average_rating_before_type_cast,
+          reviews_count: meal.reviews_count,
           created_at: meal.created_at
         }
       end

@@ -3,8 +3,8 @@ class Web::DeliveriesController < WebController
   before_action -> { require_role(:delivery_driver) }
 
   def index
-    @available = Order.where(status: :accepted)
-    @my_deliveries = current_user.orders_as_delivery_driver.where.not(status: [:cancelled, :completed])
+    @available = Order.where(status: :accepted).includes(:cook, :customer)
+    @my_deliveries = current_user.orders_as_delivery_driver.includes(:cook, :customer).where.not(status: [:cancelled, :completed])
   end
 
   def take

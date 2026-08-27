@@ -1,0 +1,24 @@
+<div class="max-w-md mx-auto card p-6 md:p-8">
+  <div class="card-header">
+    <h1 class="heading-2"><i class="fas fa-plus-circle text-primary"></i> Ajouter un livreur</h1>
+  </div>
+  <div class="card-body">
+    <p class="text-sm text-gray-500 mb-4">Entrez le numéro de téléphone du livreur. S'il est déjà inscrit sur la plateforme, son nom et prénom seront automatiquement récupérés.</p>
+    <form action="/drivers" method="post" class="space-y-4">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+      <div>
+        <label class="label">Numéro de téléphone</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fas fa-phone"></i></span>
+          <input type="tel" name="phone_number" required class="input pl-10" placeholder="Ex: 771234567">
+        </div>
+      </div>
+      <button type="submit" class="btn w-full" style="background-color:#9333ea;color:white;border:none">
+        <i class="fas fa-search"></i> Rechercher et ajouter
+      </button>
+    </form>
+    <div class="mt-4 text-center">
+      <a href="/drivers" class="text-sm text-primary hover:underline"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+    </div>
+  </div>
+</div>

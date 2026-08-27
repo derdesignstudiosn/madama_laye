@@ -16,9 +16,9 @@ class Web::ClientsController < WebController
       cook_conditions = terms.map { |t| "(LOWER(users.first_name) LIKE ? OR LOWER(users.last_name) LIKE ?)" }.join(" OR ")
       cook_bindings = terms.flat_map { |t| ["%#{t}%", "%#{t}%"] }
 
-      meals = base_meals.joins(:user).where("(#{conditions}) OR (#{cook_conditions})", *bindings, *cook_bindings)
+      meals = base_meals.includes(:user).where("(#{conditions}) OR (#{cook_conditions})", *bindings, *cook_bindings)
     else
-      meals = base_meals.limit(10)
+      meals = base_meals.includes(:user).limit(10)
     end
 
     @results = meals.group_by(&:user).map { |cook, m| { cook: cook, meals: m, products: [] } }
@@ -28,7 +28,7 @@ class Web::ClientsController < WebController
       product_conditions = terms.map { |t| "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)" }.join(" OR ")
       product_bindings = terms.flat_map { |t| ["%#{t}%", "%#{t}%"] }
 
-      matching_products = DailyProduct.for_date(Date.current).available
+      matching_products = DailyProduct.for_date(Date.current).available.includes(:user)
         .where(product_conditions, *product_bindings)
         .order(created_at: :desc)
 

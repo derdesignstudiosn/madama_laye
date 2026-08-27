@@ -10,7 +10,7 @@ class Web::AdminController < WebController
     @pending_orders = Order.pending_orders.count
     @pending_withdrawals = Withdrawal.pending.count
     @users = User.order(created_at: :desc).limit(30)
-    @recent_orders = Order.order(created_at: :desc).limit(10)
+    @recent_orders = Order.includes(:customer, :cook).order(created_at: :desc).limit(10)
   end
 
   def withdrawals

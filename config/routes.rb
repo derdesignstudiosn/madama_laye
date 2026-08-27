@@ -10,6 +10,9 @@ Rails.application.routes.draw do
       patch "profile/location", to: "users#update_location"
 
       get "cooks/nearby", to: "users#cooks_nearby"
+      get "cooks/drivers/list", to: "cooks#drivers"
+      post "cooks/drivers/add", to: "cooks#add_driver"
+      delete "cooks/drivers/:id", to: "cooks#remove_driver"
       get "cooks/:id", to: "users#cook_profile"
       get "drivers/nearby", to: "users#delivery_drivers_nearby"
 
@@ -104,6 +107,12 @@ Rails.application.routes.draw do
   # Deliveries (driver)
   get "deliveries", to: "web/deliveries#index"
   get "deliveries/:id/take", to: "web/deliveries#take"
+
+  # Drivers management (cook)
+  get "drivers", to: "web/drivers#index"
+  get "drivers/new", to: "web/drivers#new"
+  post "drivers", to: "web/drivers#create"
+  get "drivers/:id/remove", to: "web/drivers#destroy"
 
   # Admin
   get "admin", to: "web/admin#index"

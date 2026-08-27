@@ -4,7 +4,7 @@ module Api
       before_action :set_meal, only: [:create]
 
       def index
-        reviews = Review.where(meal_id: params[:meal_id]).recent
+        reviews = Review.where(meal_id: params[:meal_id]).includes(:user).recent
         result = paginate(reviews)
         render_success({ reviews: result[:data].map { |r| review_response(r) }, meta: result[:meta] })
       end
